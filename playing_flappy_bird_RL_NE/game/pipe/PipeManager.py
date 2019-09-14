@@ -2,12 +2,16 @@ from Pipe import Pipe
 import random
 
 PIPE_GENERATION_RANGE = {
-    'MIN': 50,
+    'MIN': 60,
     'MAX': 1000
 }
 PIPE_PROBABILITY = 0.1
 
-PIPE_SPEED = -10
+PIPE_SPEED = -8
+
+PIPE_GAP = 200
+BOTTOM_PIPE_MIN_Y = 700
+BOTTOM_PIPE_MAX_Y = 300
 
 class PipeManager(object):
 
@@ -35,7 +39,7 @@ class PipeManager(object):
                 self.create_pipe()
 
     def create_pipe(self):
-        pipe = Pipe(self.game.get_dimensions()[0] + 100, self.game)
+        pipe = Pipe(self.game.get_dimensions()[0] + 100, self.game, PIPE_GAP, random.randint(BOTTOM_PIPE_MAX_Y, BOTTOM_PIPE_MIN_Y))
         pipe.initialize()
         self.last_pipe_generated = 0
         self.all_pipes.append(pipe)
