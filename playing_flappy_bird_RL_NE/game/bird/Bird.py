@@ -7,11 +7,13 @@ DEFAULT_Y = 300
 DEFAULT_GRAVITY = 0.2
 MAX_GRAVITY_SPEED = 16
 
-DEFAULT_JUMP = 250
-DEFAULT_JUMP_SPEED = 10
+DEFAULT_JUMP = 220
+DEFAULT_JUMP_SPEED = 8
 
 IMAGE_PATH = r'bird.png'
 IMAGE_SCALE = 0.125
+
+DRAW_BOUNDING_BOX = False
 
 class Bird(object):
     
@@ -32,7 +34,6 @@ class Bird(object):
         self.image = pygame.image.load(os.path.join(script_dir, IMAGE_PATH))
         tempBoundingRect = self.image.get_rect()
         self.image = pygame.transform.scale(self.image, (int(IMAGE_SCALE * tempBoundingRect.width), int(IMAGE_SCALE * tempBoundingRect.height)))
-        self.bounding_rect = self.image.get_rect()
 
     def update(self):
         if (self.y_vel + DEFAULT_GRAVITY < MAX_GRAVITY_SPEED):
@@ -45,12 +46,25 @@ class Bird(object):
         self.y += self.y_vel
 
     def draw(self, screen):
-        self.bounding_rect.center = (self.x, self.y)
-        screen.blit(self.image, self.bounding_rect)
+        screen.blit(self.image, (self.x, self.y))
+        if (DRAW_BOUNDING_BOX):
+            self.draw_bounding_box(screen)
 
     def jump(self):
         self.jump_distance_remaining = DEFAULT_JUMP
         self.y_vel = 0
 
+    def draw_bounding_box(self, screen):
+        bounding_box = self.get_bounding_box()[0]
+        rect = pygame.Rect(bounding_box['x'], bounding_box['y'], bounding_box['width'], bounding_box['height'])
+        pygame.draw.rect(screen, (0, 0, 255), rect, 2)
+
     def get_bounding_box(self):
-        return self.bounding_rect
+        return [
+            {
+                'x': self.x,
+                'y': self.y,
+                'height': self.image.get_rect().height,
+                'width': self.image.get_rect().width,
+            }
+        ]

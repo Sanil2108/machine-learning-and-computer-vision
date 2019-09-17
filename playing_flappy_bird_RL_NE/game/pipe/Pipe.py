@@ -3,7 +3,9 @@ import os
 
 IMAGE_PATH = 'pipe.png'
 
-PIPE_SPEED = -10
+PIPE_SPEED = -5
+
+DRAW_BOUNDING_BOX = False
 
 class Pipe(object):
     def __init__(self, x, game, gap, bottom_pipe_y):
@@ -14,6 +16,8 @@ class Pipe(object):
 
         self.gap = gap
         self.bottom_pipe_end_y = bottom_pipe_y
+
+        self.crossed = False
 
     def initialize(self):
         script_dir = os.path.dirname(__file__)
@@ -29,11 +33,11 @@ class Pipe(object):
         self.bottom_pipe_y = self.bottom_pipe_end_y
 
     def draw(self, screen):
-        # screen.blit(self.top_image, (self.x, 0))
-        # screen.blit(self.bottom_image, (self.x, self.game.get_dimensions()[1] - self.bottom_image.get_rect().height))
-
         screen.blit(self.top_image, (self.x, self.top_pipe_y))
         screen.blit(self.bottom_image, (self.x, self.bottom_pipe_y))
+
+        if DRAW_BOUNDING_BOX:
+            self.draw_bounding_box(screen)
 
     def update(self):
         self.x += PIPE_SPEED
@@ -41,5 +45,24 @@ class Pipe(object):
     def get_x(self):
         return self.x
 
+    def draw_bounding_box(self, screen):
+        bounding_box = self.get_bounding_box()[0]
+        rect = pygame.Rect(bounding_box['x'], bounding_box['y'], bounding_box['width'], bounding_box['height'])
+        pygame.draw.rect(screen, (255, 0, 0), rect, 1)
+
+        bounding_box = self.get_bounding_box()[1]
+        rect = pygame.Rect(bounding_box['x'], bounding_box['y'], bounding_box['width'], bounding_box['height'])
+        pygame.draw.rect(screen, (255, 0, 0), rect, 1)
+
     def get_bounding_box(self):
-        return self.top_image.get_rect()
+        return [{
+            'x': self.x,
+            'y': self.top_pipe_y,
+            'height': self.top_image.get_rect().height,
+            'width': self.top_image.get_rect().width,
+        },{
+            'x': self.x,
+            'y': self.bottom_pipe_y,
+            'height': self.bottom_image.get_rect().height,
+            'width': self.bottom_image.get_rect().width,
+        }]

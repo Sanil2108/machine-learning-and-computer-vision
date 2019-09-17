@@ -1,5 +1,6 @@
 import pygame
 from bird.Bird import Bird
+from background.Background import Background
 from pipe.PipeManager import PipeManager
 from managers.GameManager import GameManager
 
@@ -11,7 +12,9 @@ JUMP_KEY = 32
 class Game(object):
     def __init__(self):
         self.bird = None
+        self.background = None
         self.pipeManager = None
+
         self.gameRunning = None
         
     def initialize(self):
@@ -23,13 +26,17 @@ class Game(object):
 
         self.bird = Bird()
         self.pipeManager = PipeManager(self)
+        self.background = Background()
 
         self.gameManager = GameManager(self)
 
         self.bird.initialize()
         self.pipeManager.initialize()
+        self.background.initialize()
 
         self.clock = pygame.time.Clock()
+
+        self.score = 0
 
         self.update()
 
@@ -59,12 +66,18 @@ class Game(object):
                 print("Game over")
                 self.gameRunning = False
 
+            self.gameManager.check_increase_score()
+
             fps = font.render(str(int(self.clock.get_fps())), True, pygame.Color('red'))
             self.screen.blit(fps, (50, 50))
             # print(int(self.clock.get_fps()))
             self.clock.tick(60)
 
+    def increase_score(self):
+        self.score += 1
+
     def draw(self):
+        self.background.draw(self.screen)
         self.bird.draw(self.screen)
         self.pipeManager.draw_all_pipes(self.screen)
 

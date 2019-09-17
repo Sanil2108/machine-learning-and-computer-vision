@@ -15,43 +15,33 @@ class GameManager(object):
 
     def check_game_over(self):
         bird = self.game.bird
-        bird_bounding_rect = bird.get_bounding_box()
+        bird_bounding_rect = bird.get_bounding_box()[0]
 
         screen_dimensions = self.game.get_dimensions()
 
         if (
-            (bird_bounding_rect.center[1] + bird_bounding_rect.height / 2 > screen_dimensions[1]) or
-            (bird_bounding_rect.center[1] < bird_bounding_rect.height / 2)
+            (bird_bounding_rect['y'] + bird_bounding_rect['height'] > screen_dimensions[1]) or
+            (bird_bounding_rect['y'] < bird_bounding_rect['height'])
         ):
             return True
 
-        bird_image_rect = {
-            'x': self.game.bird.x,
-            'y': self.game.bird.y,
-            'width': self.game.bird.image.get_rect().width,
-            'height': self.game.bird.image.get_rect().height,
-        }
 
         for i in range(len(self.game.pipeManager.all_pipes)):
-            top_pipe = self.game.pipeManager.all_pipes[i].top_image
-            bottom_pipe = self.game.pipeManager.all_pipes[i].bottom_image
-
-            top_pipe_rect = {
-                'x': self.game.pipeManager.all_pipes[i].x,
-                'y': self.game.pipeManager.all_pipes[i].top_pipe_y,
-                'width': top_pipe.get_rect().width,
-                'height': top_pipe.get_rect().height,
-            }
-
-            bottom_pipe_rect = {
-                'x': self.game.pipeManager.all_pipes[i].x,
-                'y': self.game.pipeManager.all_pipes[i].bottom_pipe_y,
-                'width': bottom_pipe.get_rect().width,
-                'height': bottom_pipe.get_rect().height,
-            }
-
-            if (self.compare_rect_intersection(top_pipe_rect, bird_image_rect) or self.compare_rect_intersection(bottom_pipe_rect, bird_image_rect)) :
+            pipe = self.game.pipeManager.all_pipes[i]
+            if (self.compare_rect_intersection(bird_bounding_rect, pipe.get_bounding_box()[0]) or 
+            self.compare_rect_intersection(bird_bounding_rect, pipe.get_bounding_box()[1])):
                 return True
 
-
         return False
+
+    def check_increase_score(self):
+        bird = self.game.bird
+        bird_bounding_rect = bird.get_bounding_box()[0]
+
+        for i in range(len(self.game.pipeManager.all_pipes)):
+            pipe = self.game.pipeManager.all_pipes[i]
+            if (pipe.crossed == False and pipe.get_bounding_box()[0]['x'] < bird_bounding_rect['x']):
+                self.game.increase_score()
+                pipe.crossed = True
+
+                print(self.game.score)

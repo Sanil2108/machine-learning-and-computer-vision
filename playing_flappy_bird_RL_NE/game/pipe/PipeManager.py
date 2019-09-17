@@ -2,14 +2,12 @@ from Pipe import Pipe
 import random
 
 PIPE_GENERATION_RANGE = {
-    'MIN': 60,
+    'MIN': 100,
     'MAX': 1000
 }
 PIPE_PROBABILITY = 0.1
 
-PIPE_SPEED = -8
-
-PIPE_GAP = 200
+PIPE_GAP = 250
 BOTTOM_PIPE_MIN_Y = 700
 BOTTOM_PIPE_MAX_Y = 300
 
@@ -26,7 +24,7 @@ class PipeManager(object):
         self.last_pipe_generated += 1
 
         for pipe in self.all_pipes:
-            if (pipe.get_x() + pipe.get_bounding_box().width < 0):
+            if (pipe.get_x() + pipe.get_bounding_box()[0]['width'] < 0):
                 self.all_pipes.remove(pipe)
             else:
                 pipe.update()
