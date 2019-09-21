@@ -43,5 +43,3 @@ class GameManager(object):
             if (pipe.crossed == False and pipe.get_bounding_box()[0]['x'] < bird_bounding_rect['x']):
                 self.game.increase_score()
                 pipe.crossed = True
-
-                print(self.game.score)

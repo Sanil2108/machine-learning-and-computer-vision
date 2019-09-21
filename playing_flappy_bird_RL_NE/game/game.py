@@ -18,7 +18,7 @@ DEFAULT_FPS = 60
 
 # Interfacing variables
 NEURAL_NETWORK_PLAYER_TYPE = 1
-HUMAN_PLAYER_TYPE = 1
+HUMAN_PLAYER_TYPE = 2
 
 class Game(object):
     def __init__(self):
@@ -80,6 +80,9 @@ class Game(object):
                     self.fps_counter += 1
                 if (event.key == DECREASE_FPS_KEY):
                     self.fps_counter -= 1
+
+    def get_number_of_items_in_state(self):
+        return 4
 
     def get_state(self):
         # Maybe send if the bird is already jumping
@@ -149,6 +152,7 @@ class Game(object):
 
     def game_reset(self):
         self.initialize()
+        self.start(self.current_player)
 
     def game_over(self):
         self.statManager.update(
