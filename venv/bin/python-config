@@ -1,4 +1,4 @@
-#!/home/sanil/Documents/neuralNetworksAndDeepLearning/venv/bin/python
+#!/home/sanil/Documents/machinelearning/venv/bin/python
 
 import sys
 import getopt
