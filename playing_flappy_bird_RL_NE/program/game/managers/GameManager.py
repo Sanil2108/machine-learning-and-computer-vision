@@ -34,12 +34,13 @@ class GameManager(object):
 
         return False
 
-    def check_increase_score(self):
+    def check_pipe_cleared(self):
         bird = self.game.bird
         bird_bounding_rect = bird.get_bounding_box()[0]
 
         for i in range(len(self.game.pipeManager.all_pipes)):
             pipe = self.game.pipeManager.all_pipes[i]
             if (pipe.crossed == False and pipe.get_bounding_box()[0]['x'] < bird_bounding_rect['x']):
-                self.game.increase_score()
                 pipe.crossed = True
+                return True
+        return False

@@ -86,16 +86,22 @@ class Game(object):
     def get_state(self):
         # Maybe send if the bird is already jumping
         selected_pipe = None
-        for i in range(self.pipeManager.all_pipes):
+        for i in range(len(self.pipeManager.all_pipes)):
             if (self.pipeManager.all_pipes[i].x > self.bird.x):
                 selected_pipe = self.pipeManager.all_pipes[i]
 
-        output_array = [
-            selected_pipe.x,
-            selected_pipe.bottom_pipe_end_y,
-            selected_pipe.top_pipe_end_y,
-            self.bird.y, 
-        ]
+        if (selected_pipe == None):
+            output_array = [
+                -1, -1, -1, self.bird.y,
+            ]
+        else:
+            output_array = [
+                selected_pipe.x,
+                selected_pipe.bottom_pipe_end_y,
+                selected_pipe.top_pipe_end_y,
+                self.bird.y, 
+            ]
+
         return output_array
 
     def update_with_params(self, params):
@@ -123,10 +129,21 @@ class Game(object):
             self.game_over()
             self.game_reset()
 
-        self.gameManager.check_increase_score()
+        action_successful = False
+        pipe_cleared = False
+        if(self.gameManager.check_pipe_cleared()):
+            self.increase_score()
+            action_successful = True
+            pipe_cleared = True
+        if(action == constants.ACTION_DO_NOTHING and pipe_cleared):
+            self.increase_score()
 
         self.fps = font.render(str(int(self.clock.get_fps())), True, pygame.Color('white'))
         self.clock.tick(self.fps_counter)
+
+        return {
+            'action_successful': action_successful,
+        }
 
     def update(self):
         font = pygame.font.Font(None, 30)
@@ -146,7 +163,8 @@ class Game(object):
                 self.gameRunning = False
                 self.game_over()
 
-            self.gameManager.check_increase_score()
+            if(self.gameManager.check_pipe_cleared()):
+                self.increase_score()
 
             self.fps = font.render(str(int(self.clock.get_fps())), True, pygame.Color('white'))
             self.clock.tick(self.fps_counter)
