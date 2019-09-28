@@ -97,8 +97,8 @@ class Game(object):
         else:
             output_array = [
                 selected_pipe.x,
-                selected_pipe.bottom_pipe_end_y,
-                selected_pipe.top_pipe_end_y,
+                selected_pipe.bottom_pipe_y,
+                selected_pipe.top_pipe_y,
                 self.bird.y, 
             ]
 
@@ -124,19 +124,19 @@ class Game(object):
         self.draw()
 
         pygame.display.flip()
+        action_successful = False
 
         if (self.gameManager.check_game_over()) :
             self.game_over()
             self.game_reset()
+        elif (action == constants.ACTION_DO_NOTHING and self.bird.jump_distance_remaining <= 0):
+            self.increase_score()
+            action_successful = True
 
-        action_successful = False
         pipe_cleared = False
         if(self.gameManager.check_pipe_cleared()):
             self.increase_score()
             action_successful = True
-            pipe_cleared = True
-        if(action == constants.ACTION_DO_NOTHING and pipe_cleared):
-            self.increase_score()
 
         self.fps = font.render(str(int(self.clock.get_fps())), True, pygame.Color('white'))
         self.clock.tick(self.fps_counter)
