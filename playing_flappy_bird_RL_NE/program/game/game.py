@@ -25,7 +25,6 @@ class Game(object):
         self.pipeManager = None
 
         self.gameRunning = None
-        self.jump_enabled = True
 
         self.statManager = StatManager(self)
 
@@ -34,45 +33,44 @@ class Game(object):
         self.current_player = None
         self.history = None
         
-    def initialize(self):
+    def initialize(self, params):
         self.gameRunning = True
+
+        self.jump_enabled = params['jumpEnabled']
+        self.bird_count = params['birdCount'];
 
         pygame.init()
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
         self.screen.fill(BG_COLOR)
 
-        self.bird = Bird()
+        self.birds = []
+        for i in range(self.bird_count):
+            self.birds.push(Bird())
         self.pipeManager = PipeManager(self)
         self.background = Background()
 
         self.gameManager = GameManager(self)
 
-        self.bird.initialize()
+        for i in range(self.bird_count):
+            self.birds[i].initialize()
         self.pipeManager.initialize()
         self.background.initialize()
 
         self.clock = pygame.time.Clock()
 
         self.score = 0
-        self.fps = -1
 
     def start(self, player):
         self.current_player = player
-        if (player == constants.NEURAL_NETWORK_PLAYER):
-            self.jump_enabled = False
-            # Do nothing right now. It is the job of the neural network to call
-            # update_with_params with correct parameter values
-            pass
-        elif(player == constants.HUMAN_PLAYER):
+        if(player == constants.HUMAN_PLAYER):
             self.update()
-
 
     def handle_events(self):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == JUMP_KEY and self.jump_enabled:
-                    self.bird.jump()
+                    self.birds[0].jump()
                 if (event.key == EXIT_KEY):
                     exit()
                 if (event.key == INCREASE_FPS_KEY):
@@ -83,7 +81,7 @@ class Game(object):
     def get_number_of_items_in_state(self):
         return 4
 
-    def get_state(self):
+    def get_state(self, index):
         # Maybe send if the bird is already jumping
         selected_pipe = None
         for i in range(len(self.pipeManager.all_pipes)):
@@ -99,26 +97,26 @@ class Game(object):
                 selected_pipe.x,
                 selected_pipe.bottom_pipe_y,
                 selected_pipe.top_pipe_y,
-                self.bird.y, 
+                self.birds[index].y,
             ]
 
         return output_array
 
+    # Params would take an array of actions
     def update_with_params(self, params):
-        # TODO: Maybe not the right place for it
-        action = params['action']
-        if (action == constants.ACTION_JUMP):
-            self.bird.jump()
-        elif (action == constants.ACTION_DO_NOTHING):
-            pass
+        actions = params['actions']
+        assert len(actions) == self.bird_count
 
-        font = pygame.font.Font(None, 30)
+        for i in range(len(actions)):
+            if actions[i] == constants.ACTION_JUMP:
+                self.birds[i].jump()
         
         self.screen.fill(BG_COLOR)
 
         self.handle_events()
 
-        self.bird.update()
+        for bird of self.birds:
+            bird.update()
         self.pipeManager.update_all_pipes()
 
         self.draw()
@@ -133,12 +131,10 @@ class Game(object):
             self.increase_score()
             action_successful = True
 
-        pipe_cleared = False
         if(self.gameManager.check_pipe_cleared()):
             self.increase_score()
             action_successful = True
 
-        self.fps = font.render(str(int(self.clock.get_fps())), True, pygame.Color('white'))
         self.clock.tick(self.fps_counter)
 
         return {
@@ -146,7 +142,6 @@ class Game(object):
         }
 
     def update(self):
-        font = pygame.font.Font(None, 30)
         while self.gameRunning:
             self.screen.fill(BG_COLOR)
 
@@ -166,7 +161,6 @@ class Game(object):
             if(self.gameManager.check_pipe_cleared()):
                 self.increase_score()
 
-            self.fps = font.render(str(int(self.clock.get_fps())), True, pygame.Color('white'))
             self.clock.tick(self.fps_counter)
 
         self.game_reset()
@@ -186,16 +180,19 @@ class Game(object):
         )
 
     def draw(self):
+        # Objects
+        for bird in self.birds:
+            bird.draw(self.screen)
         self.background.draw(self.screen)
-        self.bird.draw(self.screen)
         self.pipeManager.draw_all_pipes(self.screen)
 
+        font = pygame.font.Font(None, 30)
+
         # FPS counter
-        if (self.fps is not -1):
-            self.screen.blit(self.fps, (5, 5))
+        fps_font = font.render(str(self.clock.get_fps()), True, pygame.Color('white'))
+        self.screen.blit(fps_font, (5, 5))
 
         # Score
-        font = pygame.font.Font(None, 30)
         score_font = font.render(str(self.score), True, pygame.Color('white'))
         self.screen.blit(score_font, (5, 40))
 
@@ -204,5 +201,5 @@ class Game(object):
 
 if __name__ == '__main__':
     game = Game()
-    game.initialize()
-    game.start(HUMAN_PLAYER_TYPE)
+    game.initialize({'birdCount': 1, 'jumpEnabled':True})
+    game.start(constants.HUMAN_PLAYER_TYPE)

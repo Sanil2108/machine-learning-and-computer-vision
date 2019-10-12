@@ -14,9 +14,10 @@ import constants
 NUMBER_OF_FRAMES_BEFORE_TRAIN = 300
 
 # For random decision making
-RANDOM_X_INTERCEPT = 1000
+RANDOM_X_INTERCEPT = 100000
 RANDOM_Y_INTERCEPT = 1
 
+# TODO: Ignored until flow is done
 class NeuralNetworkPlayer(object):
     def __init__(self, input_size):
         self.model = Sequential()
@@ -51,7 +52,7 @@ class NeuralNetworkPlayer(object):
             self.output_not_trained.append(to_categorical(output, num_classes=2))
 
     def random_decision_probability(self):
-        return 0.02
+        # return 0.02
         slope = -RANDOM_Y_INTERCEPT / RANDOM_X_INTERCEPT
         c = RANDOM_Y_INTERCEPT
         return self.frame_counter * slope + c
@@ -93,3 +94,6 @@ class NeuralNetworkPlayer(object):
 
     def get_history(self):
         return self.history
+
+    def get_initialization_params(self):
+        return {'birdCount': 1, 'jumpEnabled': False}

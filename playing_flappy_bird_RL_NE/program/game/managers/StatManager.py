@@ -6,7 +6,7 @@ from pylab import *
 class StatManager(object):
     def __init__(self, game):
         self.game = game
-        self.fig, self.axes = plt.subplots(2, 1)
+        self.fig, self.axes = plt.subplots(3, 1)
         
         self.all_scores = []
 
@@ -39,10 +39,15 @@ class StatManager(object):
         self.axes[1].set_xlabel('Games')
         self.axes[1].set_ylabel('Score')
 
+    def draw_jump_chart(self, params):
+        self.axes[2].clear()
+
+        
     def update(self, params):
         self.all_scores.append(params['score'])
         self.draw_score(params)
         self.draw_average_scores(params)
+        self.draw_jump_chart(params)
 
         plt.draw()
         plt.pause(1e-10)
