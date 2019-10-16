@@ -2,11 +2,10 @@ import pygame
 from game.bird.Bird import Bird
 from game.background.Background import Background
 from game.pipe.PipeManager import PipeManager
+from game.bird.BirdManager import BirdManager
 
 from game.managers.GameManager import GameManager
 from game.managers.StatManager import StatManager
-
-import constants
 
 BG_COLOR = (255, 255, 255)
 SCREEN_SIZE = (360, 720)
@@ -20,9 +19,10 @@ DEFAULT_FPS = 60
 
 class Game(object):
     def __init__(self):
-        self.bird = None
-        self.background = None
+        self.birdManager = None
         self.pipeManager = None
+
+        self.background = None
 
         self.gameRunning = None
 
@@ -30,29 +30,22 @@ class Game(object):
 
         self.fps_counter = DEFAULT_FPS
 
-        self.current_player = None
         self.history = None
         
-    def initialize(self, params):
+    def initialize(self):
         self.gameRunning = True
-
-        self.jump_enabled = params['jumpEnabled']
-        self.bird_count = params['birdCount'];
 
         pygame.init()
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
         self.screen.fill(BG_COLOR)
 
-        self.birds = []
-        for i in range(self.bird_count):
-            self.birds.push(Bird())
         self.pipeManager = PipeManager(self)
+        self.birdManager = BirdManager(self)
         self.background = Background()
 
         self.gameManager = GameManager(self)
 
-        for i in range(self.bird_count):
-            self.birds[i].initialize()
+        self.birdManager.initialize()
         self.pipeManager.initialize()
         self.background.initialize()
 
@@ -60,10 +53,8 @@ class Game(object):
 
         self.score = 0
 
-    def start(self, player):
-        self.current_player = player
-        if(player == constants.HUMAN_PLAYER):
-            self.update()
+    def start(self):
+        self.update()
 
     def handle_events(self):
         events = pygame.event.get()
@@ -102,52 +93,13 @@ class Game(object):
 
         return output_array
 
-    # Params would take an array of actions
-    def update_with_params(self, params):
-        actions = params['actions']
-        assert len(actions) == self.bird_count
-
-        for i in range(len(actions)):
-            if actions[i] == constants.ACTION_JUMP:
-                self.birds[i].jump()
-        
-        self.screen.fill(BG_COLOR)
-
-        self.handle_events()
-
-        for bird of self.birds:
-            bird.update()
-        self.pipeManager.update_all_pipes()
-
-        self.draw()
-
-        pygame.display.flip()
-        action_successful = False
-
-        if (self.gameManager.check_game_over()) :
-            self.game_over()
-            self.game_reset()
-        elif (action == constants.ACTION_DO_NOTHING and self.bird.jump_distance_remaining <= 0):
-            self.increase_score()
-            action_successful = True
-
-        if(self.gameManager.check_pipe_cleared()):
-            self.increase_score()
-            action_successful = True
-
-        self.clock.tick(self.fps_counter)
-
-        return {
-            'action_successful': action_successful,
-        }
-
     def update(self):
         while self.gameRunning:
             self.screen.fill(BG_COLOR)
 
             self.handle_events()
 
-            self.bird.update()
+            self.birdManager.update_all_birds()
             self.pipeManager.update_all_pipes()
 
             self.draw()
@@ -181,10 +133,9 @@ class Game(object):
 
     def draw(self):
         # Objects
-        for bird in self.birds:
-            bird.draw(self.screen)
         self.background.draw(self.screen)
         self.pipeManager.draw_all_pipes(self.screen)
+        self.birdManager.draw_all_birds(self.screen)
 
         font = pygame.font.Font(None, 30)
 
@@ -201,5 +152,5 @@ class Game(object):
 
 if __name__ == '__main__':
     game = Game()
-    game.initialize({'birdCount': 1, 'jumpEnabled':True})
+    game.initialize({'jumpEnabled':False})
     game.start(constants.HUMAN_PLAYER_TYPE)

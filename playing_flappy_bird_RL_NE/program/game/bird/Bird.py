@@ -1,5 +1,6 @@
 import pygame
 import os
+from game.bird.BirdBrain import BirdBrain
 
 DEFAULT_X = 50
 DEFAULT_Y = 300
@@ -15,15 +16,28 @@ IMAGE_SCALE = 0.125
 
 DRAW_BOUNDING_BOX = False
 
+def check_point_in_rect(point, rect):
+    if (point[0] > rect['x'] and point[0] < rect['x'] + rect['width'] and point[1] < rect['y'] + rect['height'] and point[1] > rect['y']) :
+        return True
+
+def compare_rect_intersection(rect1, rect2):
+    if (check_point_in_rect([rect1['x'], rect1['y']], rect2) or check_point_in_rect([rect1['x'] + rect1['width'], rect1['y']], rect2) or
+        check_point_in_rect([rect1['x'] + rect1['width'], rect1['y'] + rect1['height']], rect2) or check_point_in_rect([rect1['x'], rect1['y'] + rect1['height']], rect2)):
+        return True
+
 class Bird(object):
     
-    def __init__(self):
+    def __init__(self, game):
         self.x = -1
         self.y = -1
         self.x_vel = 0
         self.y_vel = 0
 
         self.jump_distance_remaining = 0
+
+        self.game = game
+
+        self.brain = None
 
     def initialize(self):
         self.x = DEFAULT_X
@@ -34,6 +48,40 @@ class Bird(object):
         self.image = pygame.image.load(os.path.join(script_dir, IMAGE_PATH))
         tempBoundingRect = self.image.get_rect()
         self.image = pygame.transform.scale(self.image, (int(IMAGE_SCALE * tempBoundingRect.width), int(IMAGE_SCALE * tempBoundingRect.height)))
+
+        self.brain = BirdBrain()
+
+    def check_pipe_cleared(self):
+        bird_bounding_rect = self.get_bounding_box()[0]
+
+        for i in range(len(self.game.pipeManager.all_pipes)):
+            pipe = self.game.pipeManager.all_pipes[i]
+            if (pipe.crossed == False and pipe.get_bounding_box()[0]['x'] < bird_bounding_rect['x']):
+                pipe.crossed = True
+                return True
+        return False
+
+    def check_if_out(self):
+        bird_bounding_rect = self.get_bounding_box()[0]
+
+        screen_dimensions = self.game.get_dimensions()
+
+        if (
+            (bird_bounding_rect['y'] + bird_bounding_rect['height'] > screen_dimensions[1]) or
+            (bird_bounding_rect['y'] < bird_bounding_rect['height'])
+        ):
+            return True
+
+        for i in range(len(self.game.pipeManager.all_pipes)):
+            pipe = self.game.pipeManager.all_pipes[i]
+            if (compare_rect_intersection(bird_bounding_rect, pipe.get_bounding_box()[0]) or 
+            compare_rect_intersection(bird_bounding_rect, pipe.get_bounding_box()[1])):
+                return True
+
+        return False
+
+    def decide(self):
+        self.brain.predict({})
 
     def update(self):
         if (self.y_vel + DEFAULT_GRAVITY < MAX_GRAVITY_SPEED):
