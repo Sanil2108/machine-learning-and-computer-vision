@@ -1,6 +1,6 @@
 from game.bird.Bird import Bird
 
-BIRD_COUNT = 3
+BIRD_COUNT = 10
 
 class BirdManager(object):
 
@@ -15,6 +15,10 @@ class BirdManager(object):
         for bird in self.birds:
             if bird.check_if_out():
                 self.birds.remove(bird)
+        
+        if len(self.birds) == 0:
+            self.game.game_over()
+            self.game.game_reset()
 
     def initialize(self):
         self.birds = []

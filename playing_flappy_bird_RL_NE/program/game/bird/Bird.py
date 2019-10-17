@@ -1,6 +1,7 @@
 import pygame
 import os
 from game.bird.BirdBrain import BirdBrain
+import numpy as np
 
 DEFAULT_X = 50
 DEFAULT_Y = 300
@@ -39,6 +40,8 @@ class Bird(object):
 
         self.brain = None
 
+        self.score = 0
+
     def initialize(self):
         self.x = DEFAULT_X
         self.y = DEFAULT_Y
@@ -46,10 +49,12 @@ class Bird(object):
         script_dir = os.path.dirname(__file__)
 
         self.image = pygame.image.load(os.path.join(script_dir, IMAGE_PATH))
+        self.image.fill((255, 255, 255, 100), None, pygame.BLEND_RGBA_MULT)
+
         tempBoundingRect = self.image.get_rect()
         self.image = pygame.transform.scale(self.image, (int(IMAGE_SCALE * tempBoundingRect.width), int(IMAGE_SCALE * tempBoundingRect.height)))
 
-        self.brain = BirdBrain()
+        self.brain = BirdBrain(self.game)
 
     def check_pipe_cleared(self):
         bird_bounding_rect = self.get_bounding_box()[0]
@@ -79,9 +84,19 @@ class Bird(object):
                 return True
 
         return False
+    
+    @staticmethod
+    def get_bird_state_count():
+        return 1
+
+    def get_bird_state(self):
+        return [self.y]
 
     def decide(self):
-        self.brain.predict({})
+        params = np.array([self.game.get_game_state() + self.get_bird_state()])
+        prediction = self.brain.predict(params)
+        if (prediction < 0.5):
+            self.jump()
 
     def update(self):
         if (self.y_vel + DEFAULT_GRAVITY < MAX_GRAVITY_SPEED):
@@ -92,6 +107,9 @@ class Bird(object):
             self.y -= DEFAULT_JUMP_SPEED
 
         self.y += self.y_vel
+
+        if (self.check_pipe_cleared()):
+            self.score += 1
 
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))

@@ -4,7 +4,6 @@ from game.background.Background import Background
 from game.pipe.PipeManager import PipeManager
 from game.bird.BirdManager import BirdManager
 
-from game.managers.GameManager import GameManager
 from game.managers.StatManager import StatManager
 
 BG_COLOR = (255, 255, 255)
@@ -43,15 +42,11 @@ class Game(object):
         self.birdManager = BirdManager(self)
         self.background = Background()
 
-        self.gameManager = GameManager(self)
-
         self.birdManager.initialize()
         self.pipeManager.initialize()
         self.background.initialize()
 
         self.clock = pygame.time.Clock()
-
-        self.score = 0
 
     def start(self):
         self.update()
@@ -70,25 +65,25 @@ class Game(object):
                     self.fps_counter -= 1
 
     def get_number_of_items_in_state(self):
-        return 4
+        return 4 + Bird.get_bird_state_count()
 
-    def get_state(self, index):
+    def get_game_state(self):
         # Maybe send if the bird is already jumping
         selected_pipe = None
         for i in range(len(self.pipeManager.all_pipes)):
-            if (self.pipeManager.all_pipes[i].x > self.bird.x):
+            if (self.pipeManager.all_pipes[i].x > 50):
                 selected_pipe = self.pipeManager.all_pipes[i]
 
         if (selected_pipe == None):
             output_array = [
-                -1, -1, -1, self.bird.y,
+                -1, -1, -1, SCREEN_SIZE[1],
             ]
         else:
             output_array = [
                 selected_pipe.x,
                 selected_pipe.bottom_pipe_y,
                 selected_pipe.top_pipe_y,
-                self.birds[index].y,
+                SCREEN_SIZE[1],
             ]
 
         return output_array
@@ -106,28 +101,18 @@ class Game(object):
 
             pygame.display.flip()
 
-            if (self.gameManager.check_game_over()) :
-                self.gameRunning = False
-                self.game_over()
-
-            if(self.gameManager.check_pipe_cleared()):
-                self.increase_score()
-
             self.clock.tick(self.fps_counter)
 
         self.game_reset()
 
-    def increase_score(self):
-        self.score += 1
-
     def game_reset(self):
         self.initialize()
-        self.start(self.current_player)
+        self.start()
 
     def game_over(self):
         self.statManager.update(
             {
-                'score': self.score,
+                'score': 0,
             }
         )
 
@@ -142,10 +127,6 @@ class Game(object):
         # FPS counter
         fps_font = font.render(str(self.clock.get_fps()), True, pygame.Color('white'))
         self.screen.blit(fps_font, (5, 5))
-
-        # Score
-        score_font = font.render(str(self.score), True, pygame.Color('white'))
-        self.screen.blit(score_font, (5, 40))
 
     def get_dimensions(self):
         return SCREEN_SIZE
