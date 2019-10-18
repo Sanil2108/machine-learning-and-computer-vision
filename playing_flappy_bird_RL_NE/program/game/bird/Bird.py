@@ -17,6 +17,12 @@ IMAGE_SCALE = 0.125
 
 DRAW_BOUNDING_BOX = False
 
+
+script_dir = os.path.dirname(__file__)
+IMAGE = pygame.image.load(os.path.join(script_dir, IMAGE_PATH))
+tempBoundingRect = IMAGE.get_rect()
+IMAGE = pygame.transform.scale(IMAGE, (int(IMAGE_SCALE * tempBoundingRect.width), int(IMAGE_SCALE * tempBoundingRect.height)))
+
 def check_point_in_rect(point, rect):
     if (point[0] > rect['x'] and point[0] < rect['x'] + rect['width'] and point[1] < rect['y'] + rect['height'] and point[1] > rect['y']) :
         return True
@@ -34,6 +40,8 @@ class Bird(object):
         self.x_vel = 0
         self.y_vel = 0
 
+        self.score = 0
+
         self.jump_distance_remaining = 0
 
         self.game = game
@@ -42,17 +50,18 @@ class Bird(object):
 
         self.score = 0
 
+    def copy(self, bird):
+        self.brain = bird.brain
+
     def initialize(self):
         self.x = DEFAULT_X
         self.y = DEFAULT_Y
 
-        script_dir = os.path.dirname(__file__)
-
-        self.image = pygame.image.load(os.path.join(script_dir, IMAGE_PATH))
+        self.image = IMAGE
         self.image.fill((255, 255, 255, 100), None, pygame.BLEND_RGBA_MULT)
 
-        tempBoundingRect = self.image.get_rect()
-        self.image = pygame.transform.scale(self.image, (int(IMAGE_SCALE * tempBoundingRect.width), int(IMAGE_SCALE * tempBoundingRect.height)))
+        # tempBoundingRect = self.image.get_rect()
+        # self.image = pygame.transform.scale(self.image, (int(IMAGE_SCALE * tempBoundingRect.width), int(IMAGE_SCALE * tempBoundingRect.height)))
 
         self.brain = BirdBrain(self.game)
 
@@ -89,6 +98,10 @@ class Bird(object):
     def get_bird_state_count():
         return 1
 
+    @staticmethod
+    def get_bird_score(bird):
+        return bird.score ** 2
+
     def get_bird_state(self):
         return [self.y]
 
@@ -108,8 +121,7 @@ class Bird(object):
 
         self.y += self.y_vel
 
-        if (self.check_pipe_cleared()):
-            self.score += 1
+        self.score += 1
 
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))
@@ -135,3 +147,9 @@ class Bird(object):
                 'width': self.image.get_rect().width,
             }
         ]
+
+    def mutate(self):
+        self.brain.mutate()
+
+    def __str__(self):
+        print('{}'.format(self.score))

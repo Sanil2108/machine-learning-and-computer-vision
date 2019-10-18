@@ -30,13 +30,15 @@ class Game(object):
         self.fps_counter = DEFAULT_FPS
 
         self.history = None
-        
-    def initialize(self):
-        self.gameRunning = True
 
         pygame.init()
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
         self.screen.fill(BG_COLOR)
+
+        self.clock = pygame.time.Clock()
+        
+    def initialize(self):
+        self.gameRunning = True
 
         self.pipeManager = PipeManager(self)
         self.birdManager = BirdManager(self)
@@ -45,8 +47,6 @@ class Game(object):
         self.birdManager.initialize()
         self.pipeManager.initialize()
         self.background.initialize()
-
-        self.clock = pygame.time.Clock()
 
     def start(self):
         self.update()
