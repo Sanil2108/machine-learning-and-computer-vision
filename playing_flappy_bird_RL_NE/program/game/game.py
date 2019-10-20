@@ -37,14 +37,14 @@ class Game(object):
 
         self.clock = pygame.time.Clock()
         
-    def initialize(self):
+    def initialize(self, params = {}):
         self.gameRunning = True
 
         self.pipeManager = PipeManager(self)
         self.birdManager = BirdManager(self)
         self.background = Background()
 
-        self.birdManager.initialize()
+        self.birdManager.initialize(params)
         self.pipeManager.initialize()
         self.background.initialize()
 
@@ -55,8 +55,8 @@ class Game(object):
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == JUMP_KEY and self.jump_enabled:
-                    self.birds[0].jump()
+                # if event.key == JUMP_KEY:
+                #     self.birds[0].jump()
                 if (event.key == EXIT_KEY):
                     exit()
                 if (event.key == INCREASE_FPS_KEY):
@@ -105,8 +105,8 @@ class Game(object):
 
         self.game_reset()
 
-    def game_reset(self):
-        self.initialize()
+    def game_reset(self, params = {}):
+        self.initialize(params)
         self.start()
 
     def game_over(self):

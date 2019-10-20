@@ -22,9 +22,9 @@ class BirdManager(object):
                 self.birds.remove(bird)
         
         if len(self.birds) == 0:
-            self.next_generation()
+            new_birds = self.next_generation()
             self.game.game_over()
-            self.game.game_reset()
+            self.game.game_reset({'new_birds': new_birds})
 
     def normalize_scores(self):
         sum_ = 0
@@ -51,6 +51,7 @@ class BirdManager(object):
         new_birds = []
         while len(new_birds) < len(self.deleted_birds):
             bird = Bird(self.game)
+            bird.initialize()
             bird.copy(self.get_random_birds_on_score(sorted_birds))
             new_birds.append(bird)
 
@@ -63,12 +64,19 @@ class BirdManager(object):
         for bird in random_birds:
             bird.mutate()
 
-    def initialize(self):
-        self.birds = []
-        for i in range(BIRD_COUNT):
-            b = Bird(self.game)
-            b.initialize()
-            self.birds.append(b)
+        return random_birds
+
+    def initialize(self, params = {}):
+        if ('new_birds' in params.keys()):
+            self.birds = params['new_birds']
+        else:
+            self.birds = []
+
+            for i in range(BIRD_COUNT):
+                b = Bird(self.game)
+                b.initialize()
+                b.initialize()
+                self.birds.append(b)
 
     def update_all_birds(self):
         for bird in self.birds:

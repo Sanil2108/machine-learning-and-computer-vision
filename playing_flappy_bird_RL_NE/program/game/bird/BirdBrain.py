@@ -13,6 +13,7 @@ class BirdBrain(object):
         self.actualBrain.compile(loss = 'binary_crossentropy', optimizer = Adam(lr = 0.1), metrics=['accuracy'])
 
     def mutate(self):
+        # Select a random weight. Change the weight by some arbitrary amount
         pass
 
     def predict(self, params):

@@ -19,9 +19,6 @@ DRAW_BOUNDING_BOX = False
 
 
 script_dir = os.path.dirname(__file__)
-IMAGE = pygame.image.load(os.path.join(script_dir, IMAGE_PATH))
-tempBoundingRect = IMAGE.get_rect()
-IMAGE = pygame.transform.scale(IMAGE, (int(IMAGE_SCALE * tempBoundingRect.width), int(IMAGE_SCALE * tempBoundingRect.height)))
 
 def check_point_in_rect(point, rect):
     if (point[0] > rect['x'] and point[0] < rect['x'] + rect['width'] and point[1] < rect['y'] + rect['height'] and point[1] > rect['y']) :
@@ -57,11 +54,11 @@ class Bird(object):
         self.x = DEFAULT_X
         self.y = DEFAULT_Y
 
-        self.image = IMAGE
+        self.image = pygame.image.load(os.path.join(script_dir, IMAGE_PATH))
         self.image.fill((255, 255, 255, 100), None, pygame.BLEND_RGBA_MULT)
 
-        # tempBoundingRect = self.image.get_rect()
-        # self.image = pygame.transform.scale(self.image, (int(IMAGE_SCALE * tempBoundingRect.width), int(IMAGE_SCALE * tempBoundingRect.height)))
+        tempBoundingRect = self.image.get_rect()
+        self.image = pygame.transform.scale(self.image, (int(IMAGE_SCALE * tempBoundingRect.width), int(IMAGE_SCALE * tempBoundingRect.height)))
 
         self.brain = BirdBrain(self.game)
 
